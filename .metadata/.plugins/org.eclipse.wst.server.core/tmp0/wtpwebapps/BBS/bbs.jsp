@@ -1,0 +1,157 @@
+<!-- index.jsp(인덱스 페이지): 모든 웹 사이트에 있어서 가장 기본적으로 게시되는 페이지 -->
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ page import="java.io.PrintWriter"%>
+<%@ page import="bbs.BbsDAO"%>
+<%@ page import="bbs.Bbs"%>
+<%@ page import="java.util.ArrayList"%>
+<!DOCTYPE html>
+<html>
+<head>
+<!-- 기본적으로 부트스트랩은 모바일, 컴퓨터 중 어느 기기로 접속을 해도 해상도에 맞게 알아서 변경되는 템플릿이다 -->
+<!-- 반응형 웹에 적용 시킬 meta tag를 입력한다 -->
+<meta http-equiv="Content-type" content="text/html" charset="UTF-8">
+<meta name="viewport" content="width=device-width" initial-scale="1">
+<!-- 스타일 시트 참조 하는데, 그 스타일 시트 파일 경로는 css/bootstrap.css 파일이다 -->
+<link rel="stylesheet" href="css/bootstrap.css">
+<title>JSP 게시판 웹 사이트</title>
+<style type="text/css">
+	a, a:hovor {
+		color: #000000;
+		text-decoration: none;
+	}
+</style>
+</head>
+<body>
+	<!-- 세션 값 부여 -->
+	<%
+		String userID = null;
+		if(session.getAttribute("userID") != null) {
+			userID = (String) session.getAttribute("userID");
+		}
+		int pageNumber = 1;		// 기본 페이지 넘버
+		if (request.getParameter("pageNumber") != null) {	// 파라미터로 페이지 넘버를 받았을 때
+			// parseInt()메소드를 통해 넘겨받은 파라미터 값을 정수형으로 변환하여 저장한다
+			pageNumber = Integer.parseInt(request.getParameter("pageNumber"));
+		}
+	%>
+	<!-- 네비게이션 구현: 하나의 웹 사이트의 전반적인 구성을 보여주는 역할-->
+	<nav class="navbar navbar-default">
+		<!-- 로고와 작은 화면일 때 생성되는 버튼(collapse 타입으로 토글하여 작은 화면일 때 안 보이는 매뉴를 보기 위한 버튼) 구현 부 -->
+		<!-- header: 웹 페이지의 로고를 담는 영역 -->
+		<div class="navbar-header">
+			<!-- 세 줄짜리 줄이 있는 버튼 구현 -->
+			<!-- 세 줄짜리 버튼은 모바일 같이 작은 화면일 땐 나오지만 컴퓨터 같이 큰 화면일 땐 나오지 않는다 -->
+			<button type="button" class="navbar-toggle collapsed"
+				data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"
+				aria-expanded="false">
+				<!-- 버튼 내의 작대기-->
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<!-- 로고를 입력하는 부분 -->
+			<a class="navbar-brand" href="main.jsp">JSP 게시판 웹 사이트</a>
+		</div> 
+		<!-- 세 줄짜리 버튼을 클릭했을 때 나타나게 되는 매뉴 -->
+		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+			<ul class="nav navbar-nav">
+				<li><a href="main.jsp">메인</a></li>
+				<li class="active"><a href="bbs.jsp">게시판</a></li>
+			</ul>
+			<!-- 로그인이 되어있지 않은 경우에만 회원가입이나 로그인을 할 수 있게 구현 -->
+			<%
+				if(userID == null) {
+			%>
+			<ul class="nav navbar-nav navbar-right">
+				<li class="dropdown">
+					<!-- href="#": 현재 가리키고 있는 링크가 없다는 것을 의미 -->
+					<a href="#" class="dropdown-toggle"
+						data-toggle="dropdown" role="button" aria-haspopup="true"
+						aria-expanded="false">접속하기<span class="caret"></span></a>
+					<ul class="dropdown-menu">
+						<!-- class="active": 현재 선택되어있는 화면 (ex: 로그인 화면일 경우 로그인 버튼에 파란색 불이 들어온다)-->
+						<li><a href="login.jsp">로그인</a></li>
+						<li><a href="join.jsp">회원가입</a></li>
+					</ul>
+				</li>
+			</ul>
+			<!-- 로그인이 되어있는 경우의 메인 페이지 -->
+			<%
+				} else {
+			%>
+			<ul class="nav navbar-nav navbar-right">
+				<li class="dropdown">
+					<!-- href="#": 현재 가리키고 있는 링크가 없다는 것을 의미 -->
+					<a href="#" class="dropdown-toggle"
+						data-toggle="dropdown" role="button" aria-haspopup="true"
+						aria-expanded="false">회원관리<span class="caret"></span></a>
+					<ul class="dropdown-menu">
+						<!-- class="active": 현재 선택되어있는 화면 (ex: 로그인 화면일 경우 로그인 버튼에 파란색 불이 들어온다)-->
+						<li><a href="logoutAction.jsp">로그아웃</a></li>
+					</ul>
+				</li>
+			</ul>
+			<%
+				}
+			%>
+
+		</div>
+	</nav>
+	<div class="container">
+		<div>
+			<!-- table-triped: 홀수와 짝수 라인의 행의 색상이 번갈아가면서 나타남-->
+			<table class="table table-triped" style="text-align; center; border: 1px solid #dddddd">
+				<!-- thead: 테이블의 제목 부분(가장 윗줄): 각각의 속성을 알려 줌 -->
+				<thead>
+					<!-- tr: 테이블의 각각의 행 -->
+					<tr>
+						<!-- th: 각각의 속성을 명시 -->
+						<th style="background-color: #eeeeee; text-align: center;">번호</th>
+						<th style="background-color: #eeeeee; text-align: center;">제목</th>
+						<th style="background-color: #eeeeee; text-align: center;">작성자</th>
+						<th style="background-color: #eeeeee; text-align: center;">작성일</th>
+					</tr>
+				</thead>
+				<!-- 테이블에 작성할 데이터 -->
+				<tbody>
+					<%
+						BbsDAO bbsDAO = new BbsDAO();
+						ArrayList<Bbs> list = bbsDAO.getList(pageNumber);
+						for(int i = 0; i < list.size(); i++) {
+					%>
+					<tr>
+						<!-- 현재 게시글의 데이터에 대한 정보를 DB에서 불러옴 -->
+						<td style="text-align: center;"><%= list.get(i).getBbsID() %></td>
+						<!-- 제목을 눌렀을 때 해당 게시물의 페이지로 이동: 해당 게시물 번호를 메개변수로 전달함으로서 처리-->
+						<td style="text-align: center;"><a href="view.jsp?bbsID=<%=list.get(i).getBbsID()%>"><%= list.get(i).getBbsTitle() %></a></td>
+						<td style="text-align: center;"><%= list.get(i).getUserID() %></td>
+						<td style="text-align: center;"><%= list.get(i).getBbsDate().substring(0, 11) + list.get(i).getBbsDate().substring(11, 13) + "시" + list.get(i).getBbsDate().substring(14, 16) + "분" %></td>
+					</tr>
+					<%
+						}
+					%>
+				</tbody>
+			</table>
+			<!-- 페이지 구현 -->
+			<%
+				// 2페이지 이상일 경우 이전 페이지로 돌아가는 기능
+				if(pageNumber != 1) {
+			%>
+				<a href="bbs.jsp?pageNumber=<%=pageNumber - 1 %>" class="btn btn-success btn-arraw-left">이전</a>
+			<%
+				// 다음 페이지가 존재하는 경우 다음 넘어가는 기능
+				} if(bbsDAO.nextPage(pageNumber + 1)) {
+			%>
+				<a href="bbs.jsp?pageNumber=<%=pageNumber + 1 %>" class="btn btn-success btn-arraw-left">다음</a>
+			<%
+				}
+			%>
+			<a href="write.jsp" class="btn btn-primary pull-right">글쓰기</a>
+		</div>
+	</div>
+	<!-- 애니메이션을 담당할 자바스크립트 소스코드 파일의 경로 입력 -->
+	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+	<script src="js/bootstrap.js"></script>
+</body>
+</html>

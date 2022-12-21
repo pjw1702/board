@@ -1,0 +1,49 @@
+package user;
+
+public class User {
+	
+	// DB연동과 관련된 변수를 입력할 때는 DB 테이블에 입력한 변수의 이름과 동일하게 입력하는 것이 좋다
+	
+	private String userID;
+	private String userPassword;
+	private String userName;
+	private String userGender;
+	private String userEmail;
+	
+	// 한 명의 회원 데이터를 다룰 수 있는 데이터베이스 및 자바 빈즈(beans) 생성
+	// 마우스 우 클릭 > Source > Generate Getters and Setters  > Select All
+	// 하나의 데이터를 관리하고 처리할 수 있는 인스턴스를 만들기 위한 트리를 JSP에서 구현한 것을 자바 빈즈(beans)라고 한다 
+	
+	// 빈즈(beans) 클래스
+	public String getUserID() {
+		return userID;
+	}
+	public void setUserID(String userID) {
+		this.userID = userID;
+	}
+	public String getUserPassword() {
+		return userPassword;
+	}
+	public void setUserPassword(String userPassword) {
+		this.userPassword = userPassword;
+	}
+	public String getUserName() {
+		return userName;
+	}
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+	public String getUserGender() {
+		return userGender;
+	}
+	public void setUserGender(String userGender) {
+		this.userGender = userGender;
+	}
+	public String getUserEmail() {
+		return userEmail;
+	}
+	public void setUserEmail(String userEmail) {
+		this.userEmail = userEmail;
+	}
+	
+}

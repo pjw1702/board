@@ -1,0 +1,35 @@
+<!-- index.jsp(인덱스 페이지): 모든 웹 사이트에 있어서 가장 기본적으로 게시되는 페이지 -->
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<!-- 기본적으로 부트스트랩은 모바일, 컴퓨터 중 어느 기기로 접속을 해도 해상도에 맞게 알아서 변경되는 템플릿이다 -->
+<!-- 반응형 웹에 적용 시킬 meta tag를 입력한다 -->
+<meta http-equiv="Content-type" content="text/html" charset="UTF-8">
+<meta name="viewport" content="width=device-width" initial-scale="1">
+<!-- 스타일 시트 참조 하는데, 그 스타일 시트 파일 경로는 css/bootstrap.css 파일이다 -->
+<link rel="stylesheet" href="css/bootstrap.css">
+<title>JSP 게시판 웹 사이트</title>
+</head>
+<body>
+	<!-- 네비게이션 구현: 하나의 웹 사이트의 전반적인 구성을 보여주는 역할-->
+	<nav class="navbar navbar-default">
+		<!-- header: 웹 페이지의 로고를 담는 영역 -->
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle collapsed"
+				data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"
+				aria-expanded="false">
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<!-- 로고 -->
+			<a class="navbar-brand" href="main.jsp">JSP 게시판 웹 사이트2</a>
+		</div> 
+	</nav>
+	<!-- 애니메이션을 담당할 자바스크립트 소스코드 파일의 경로 입력 -->
+	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+	<script src="js/bootstrap.js"></script>
+</body>
+</html>

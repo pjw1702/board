@@ -1,0 +1,17 @@
+2022-12-12 21:49:20 0 [Note] InnoDB: Compressed tables use zlib 1.2.12
+2022-12-12 21:49:20 0 [Note] InnoDB: Number of transaction pools: 1
+2022-12-12 21:49:20 0 [Note] InnoDB: Using crc32 + pclmulqdq instructions
+2022-12-12 21:49:20 0 [Note] InnoDB: Initializing buffer pool, total size = 1.961GiB, chunk size = 31.375MiB
+2022-12-12 21:49:20 0 [Note] InnoDB: Completed initialization of buffer pool
+2022-12-12 21:49:20 0 [Note] InnoDB: File system buffers for log disabled (block size=4096 bytes)
+2022-12-12 21:49:21 0 [Note] InnoDB: 128 rollback segments are active.
+2022-12-12 21:49:21 0 [Note] InnoDB: Setting file './ibtmp1' size to 12.000MiB. Physically writing the file full; Please wait ...
+2022-12-12 21:49:21 0 [Note] InnoDB: File './ibtmp1' size is now 12.000MiB.
+2022-12-12 21:49:21 0 [Note] InnoDB: log sequence number 46590; transaction id 14
+2022-12-12 21:49:21 0 [Note] Plugin 'FEEDBACK' is disabled.
+2022-12-12 21:49:21 0 [Note] InnoDB: Loading buffer pool(s) from C:\Program Files\MariaDB 10.10\data\ib_buffer_pool
+2022-12-12 21:49:21 0 [Note] InnoDB: Buffer pool(s) load completed at 221212 21:49:21
+2022-12-12 21:49:21 0 [Note] Server socket created on IP: '::'.
+2022-12-12 21:49:21 0 [Note] Server socket created on IP: '0.0.0.0'.
+2022-12-12 21:49:21 0 [Note] C:\Program Files\MariaDB 10.10\bin\mysqld.exe: ready for connections.
+Version: '10.10.2-MariaDB'  socket: ''  port: 3306  mariadb.org binary distribution

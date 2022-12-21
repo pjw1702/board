@@ -1,0 +1,162 @@
+package bbs;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+
+public class BbsDAO {
+	// Connection: DB에 접근할 수 있게 해주는 객체
+	private Connection conn;
+	// ResultSet: 결과 값의 정보를 담을 수 있는 객체
+	private ResultSet rs;
+	
+	public BbsDAO() {
+		try {
+			// String dbURL = "jdbc:mariadb://localhost:3306/bbs";
+			String dbURL = "jdbc:mysql://localhost:3306/bbs";
+			String dbID = "root";
+			String dbPassword = "gbqjWkd9!";
+			// mariadb 드라이버
+			// Class.forName("com.mariadb.jdbc.Driver");
+			Class.forName("com.mysql.jdbc.Driver");
+			// DB 접속 정보
+			conn = DriverManager.getConnection(dbURL, dbID, dbPassword);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	// 현재 시간을 가져오는 메소드: 게시물 작성 시 현재 시각을 서버에 입력하는 기능
+	public String getDate() {
+		String SQL = "SELECT NOW()";
+		try {
+			PreparedStatement pstmt = conn.prepareStatement(SQL);
+			rs = pstmt.executeQuery();
+			if(rs.next()) {
+				// true=1: SELECT NOW()를 한 현재의 날짜를 그대로 반환
+				return rs.getString(1);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return "";	// DB 오류
+		// 여러 개의 메소드 호출로 인한 DB 접근의 마찰 방지 차원에서 메소드 바깥이 아닌 안쪽에서 정의
+	}
+	
+	// 작성한 게시글의 순번을 순차적으로 출력
+	public int getNext() {
+		// 다음 작성할 게시물의 순번은 마지막에 작성된 게시물의 순번 +1 이므로 내림차순을 해서 가장 마지막에 작성된 게시물의 번호를 가저와야 한다
+		String SQL = "SELECT bbsID FROM bbs ORDER BY bbsID DESC";
+		try {
+			PreparedStatement pstmt = conn.prepareStatement(SQL);
+			rs = pstmt.executeQuery();
+			if(rs.next()) {
+				// true=1: SELECT NOW()를 한 현재의 날짜를 그대로 반환
+				return rs.getInt(1) + 1;
+			}
+			return 1;	// 현재가 첫 번째 게시물인 경우
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return -1;	// DB 오류
+		// 여러 개의 메소드 호출로 인한 DB 접근의 마찰 방지 차원에서 메소드 바깥이 아닌 안쪽에서 정의
+	}
+	
+	// 게시물 작성
+	public int write(String bbsTitle, String userID, String bbsContent) {
+		String SQL = "INSERT INTO bbs VALUES (?, ?, ?, ?, ?, ?)";
+		try {
+			PreparedStatement pstmt = conn.prepareStatement(SQL);
+			pstmt.setInt(1, getNext());
+			pstmt.setString(2, bbsTitle);
+			pstmt.setString(3, userID);
+			pstmt.setString(4, getDate());
+			pstmt.setString(5, bbsContent);
+			// 첫 게시물 등록시 삭제가 되지 않은 것이므로 1을 입력
+			pstmt.setInt(6, 1);
+			// 성공적으로 게시물 등록 및 DB 업데이트 시 0 이상의 결과를 반환
+			// INSERT 문의 경우 executeUpdate()으로 작동
+			return pstmt.executeUpdate();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return -1;	// DB 오류
+	}
+	
+	// 등록한 글 화면에 출력
+	// 특정한 리스트를 담아서 반환
+	// Ctrl + Shift + o -> ArrayList를 외부 라이브러리에서 가져옴
+	// 게시판 페이지에 따른 총 10개의 게시글을 가져오기 위함
+	public ArrayList<Bbs> getList(int pageNumber) {
+		String SQL = "SELECT * FROM bbs WHERE bbsID < ? AND bbsAvailable = 1 ORDER BY bbsID DESC LIMIT 10";
+		// Bbs라는 클래스에서 나올 수 있는 인스턴스를 보관한 리스트 생성
+		ArrayList<Bbs> list = new ArrayList<Bbs>();
+		try {
+			PreparedStatement pstmt = conn.prepareStatement(SQL);
+			// 한 페이지 당 최대 10개 까지 게시 가능
+			pstmt.setInt(1, getNext() - (pageNumber - 1) * 10);
+			rs = pstmt.executeQuery();
+			// 게시글에 대한 정보를 리스트에 입력
+			while(rs.next()) {
+				Bbs bbs = new Bbs();
+				bbs.setBbsID(rs.getInt(1));
+				bbs.setBbsTitle(rs.getString(2));
+				bbs.setUserID(rs.getString(3));
+				bbs.setBbsDate(rs.getString(4));
+				bbs.setBbsContent(rs.getString(5));
+				bbs.setBbsAvailable(rs.getInt(6));
+				list.add(bbs);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return list;	// 리스트 출력
+	}
+	
+	// 게시글이 10개가 되었을 때 다음 페이지로 넘어가서 새로 등록해야 하므로 페이지 처리를 하기 위함
+	// 게시글이 10개 이하라면 true를 반환, 10개가 넘는다면 false 반환
+	public boolean nextPage(int pageNumber) {
+		String SQL = "SELECT * FROM bbs WHERE bbsID < ? AND bbsAvailable = 1";
+		// Bbs라는 클래스에서 나올 수 있는 인스턴스를 보관한 리스트 생성
+		ArrayList<Bbs> list = new ArrayList<Bbs>();
+		try {
+			PreparedStatement pstmt = conn.prepareStatement(SQL);
+			pstmt.setInt(1, getNext() - (pageNumber - 1) * 10);
+			rs = pstmt.executeQuery();
+			if (rs.next()) {
+				return true;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	// 글 내용 불러옴
+	public Bbs getBbs(int bbsID) {
+		String SQL = "SELECT * FROM bbs WHERE bbsID = ?";
+		// Bbs라는 클래스에서 나올 수 있는 인스턴스를 보관한 리스트 생성
+		ArrayList<Bbs> list = new ArrayList<Bbs>();
+		try {
+			PreparedStatement pstmt = conn.prepareStatement(SQL);
+			pstmt.setInt(1, bbsID);
+			rs = pstmt.executeQuery();
+			if (rs.next()) {
+				Bbs bbs = new Bbs();
+				bbs.setBbsID(rs.getInt(1));
+				bbs.setBbsTitle(rs.getString(2));
+				bbs.setUserID(rs.getString(3));
+				bbs.setBbsDate(rs.getString(4));
+				bbs.setBbsContent(rs.getString(5));
+				bbs.setBbsAvailable(rs.getInt(6));
+				return bbs;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		// 해당 글이 존재하지 않을 때
+		return null;
+	} 
+}
